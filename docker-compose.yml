@@ -1,0 +1,9 @@
+services:
+  pipeline:
+    build: .
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      PYTHONPATH: /app
+    command: bash

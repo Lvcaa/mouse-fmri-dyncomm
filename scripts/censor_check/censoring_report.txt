@@ -1,0 +1,20 @@
+Folder Bf_DTA_anes:
+  Min censoring: 2.9% (sub-ag230911a_SHAM)
+  Max censoring: 5.0% (sub-ag230914a_SHAM)
+  Average censoring: 3.2%
+
+Folder Bf_DTA_awk:
+  Min censoring: 3.7% (sub-ag231103a_SHAM)
+  Max censoring: 18.6% (sub-ag231130c_EXP)
+  Average censoring: 9.7%
+
+Folder Bf_PV_anes:
+  Min censoring: 0.9% (sub-ag240718a_EXP_bold_CNO_parcellated.csv)
+  Max censoring: 77.8% (sub-ag240801c_SHAM_bold_baseline_parcellated.csv)
+  Average censoring: 4.9%
+
+Folder Bf_PV_awk:
+  Min censoring: 3.9% (sub-ag240925d_EXP_bold_baseline_parcellated.csv)
+  Max censoring: 33.8% (sub-ag240927d_EXP_bold_CNO_parcellated.csv)
+  Average censoring: 13.8%
+

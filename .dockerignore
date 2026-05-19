@@ -1,0 +1,5 @@
+for_ludo/
+scripts/window_connectivity/
+__pycache__/
+*.pyc
+.git/

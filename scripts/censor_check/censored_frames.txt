@@ -1,0 +1,297 @@
+Folder Bf_DTA_anes:
+
+Subject 230908:
+  sub-ag230908a_EXP: 85/2070 frames censored (4.1%)
+
+Subject 230911:
+  sub-ag230911a_SHAM: 60/2070 frames censored (2.9%)
+  sub-ag230911b_EXP_: 60/2070 frames censored (2.9%)
+  sub-ag230911c_EXP: 80/2070 frames censored (3.9%)
+  sub-ag230911d_SHAM: 87/2070 frames censored (4.2%)
+
+Subject 230912:
+  sub-ag230912a_SHAM: 92/2070 frames censored (4.4%)
+  sub-ag230912b_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230912c_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230912d_SHAM: 64/2070 frames censored (3.1%)
+
+Subject 230913:
+  sub-ag230913a_EXP: 64/2070 frames censored (3.1%)
+  sub-ag230913b_SHAM: 66/2070 frames censored (3.2%)
+  sub-ag230913c_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230913d_SHAM: 60/2070 frames censored (2.9%)
+
+Subject 230914:
+  sub-ag230914a_SHAM: 104/2070 frames censored (5.0%)
+  sub-ag230914b_SHAM: 60/2070 frames censored (2.9%)
+  sub-ag230914c_SHAM: 60/2070 frames censored (2.9%)
+  sub-ag230914d_EXP: 70/2070 frames censored (3.4%)
+
+Subject 230915:
+  sub-ag230915a_EXP_: 60/2070 frames censored (2.9%)
+
+Subject 230918:
+  sub-ag230918a_SHAM_: 60/2070 frames censored (2.9%)
+  sub-ag230918b_SHAM: 64/2070 frames censored (3.1%)
+  sub-ag230918c_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230918d_SHAM_: 73/2070 frames censored (3.5%)
+
+Subject 230919:
+  sub-ag230919a_EXP_: 60/2070 frames censored (2.9%)
+  sub-ag230919b_SHAM: 70/2070 frames censored (3.4%)
+  sub-ag230919c_EXP: 65/2070 frames censored (3.1%)
+  sub-ag230919d_EXP: 64/2070 frames censored (3.1%)
+
+Subject 230920:
+  sub-ag230920a_SHAM_: 60/2070 frames censored (2.9%)
+  sub-ag230920b_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230920c_SHAM: 60/2070 frames censored (2.9%)
+
+Subject 230921:
+  sub-ag230921a_EXP_: 60/2070 frames censored (2.9%)
+  sub-ag230921b_SHAM: 60/2070 frames censored (2.9%)
+  sub-ag230921c_SHAM: 60/2070 frames censored (2.9%)
+  sub-ag230921d_EXP: 69/2070 frames censored (3.3%)
+
+Subject 230922:
+  sub-ag230922a_SHAM: 60/2070 frames censored (2.9%)
+  sub-ag230922b_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230922c_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230922d_EXP_: 60/2070 frames censored (2.9%)
+
+Subject 230925:
+  sub-ag230925a_SHAM: 60/2070 frames censored (2.9%)
+  sub-ag230925b_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230925c_EXP: 60/2070 frames censored (2.9%)
+
+Subject 230926:
+  sub-ag230926a_EXP: 60/2070 frames censored (2.9%)
+  sub-ag230926b_SHAM: 69/2070 frames censored (3.3%)
+
+
+Folder Bf_DTA_awk:
+
+Subject 231031:
+  sub-ag231031b_SHAM: 125/2190 frames censored (5.7%)
+  sub-ag231031c_EXP: 209/2190 frames censored (9.5%)
+  sub-ag231031d_SHAM: 152/2190 frames censored (6.9%)
+
+Subject 231103:
+  sub-ag231103a_SHAM: 80/2190 frames censored (3.7%)
+  sub-ag231103b_SHAM: 214/2190 frames censored (9.8%)
+  sub-ag231103c_SHAM: 155/2190 frames censored (7.1%)
+  sub-ag231103d_EXP: 343/2190 frames censored (15.7%)
+
+Subject 231110:
+  sub-ag231110a_EXP: 193/2190 frames censored (8.8%)
+  sub-ag231110b_EXP: 148/2190 frames censored (6.8%)
+  sub-ag231110c_SHAM: 233/2190 frames censored (10.6%)
+  sub-ag231110d_EXP: 365/2190 frames censored (16.7%)
+  sub-ag231110e_SHAM: 288/2190 frames censored (13.2%)
+  sub-ag231110f_SHAM: 269/2190 frames censored (12.3%)
+
+Subject 231113:
+  sub-ag231113c_SHAM: 111/2190 frames censored (5.1%)
+  sub-ag231113d_EXP: 142/2190 frames censored (6.5%)
+  sub-ag231113e_SHAM: 194/2190 frames censored (8.9%)
+  sub-ag231113f_EXP: 241/2190 frames censored (11.0%)
+
+Subject 231114:
+  sub-ag231114a_EXP: 200/2190 frames censored (9.1%)
+  sub-ag231114b_EXP: 135/2190 frames censored (6.2%)
+  sub-ag231114c_EXP: 386/2190 frames censored (17.6%)
+  sub-ag231114d_SHAM: 123/2190 frames censored (5.6%)
+  sub-ag231114e_SHAM: 121/2190 frames censored (5.5%)
+  sub-ag231114f_EXP: 245/2190 frames censored (11.2%)
+
+Subject 231115:
+  sub-ag231115b_SHAM: 147/2190 frames censored (6.7%)
+  sub-ag231115c_SHAM: 157/2190 frames censored (7.2%)
+  sub-ag231115d_SHAM: 247/2190 frames censored (11.3%)
+  sub-ag231115f_SHAM: 171/2190 frames censored (7.8%)
+
+Subject 231116:
+  sub-ag231116c_EXP: 218/2190 frames censored (10.0%)
+  sub-ag231116d_SHAM: 136/2190 frames censored (6.2%)
+
+Subject 231130:
+  sub-ag231130a_EXP: 238/2190 frames censored (10.9%)
+  sub-ag231130b_EXP: 257/2190 frames censored (11.7%)
+  sub-ag231130c_EXP: 408/2190 frames censored (18.6%)
+  sub-ag231130e_EXP: 326/2190 frames censored (14.9%)
+
+
+Folder Bf_PV_anes:
+
+Subject 240718:
+  sub-ag240718a_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240718a_EXP_bold_baseline_parcellated.csv: 56/1290 frames censored (4.3%)
+  sub-ag240718b_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240718b_SHAM_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+
+Subject 240719:
+  sub-ag240719b_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240719b_EXP_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240719c_SHAM_bold_CNO_parcellated.csv: 34/3480 frames censored (1.0%)
+  sub-ag240719c_SHAM_bold_baseline_parcellated.csv: 38/1290 frames censored (2.9%)
+
+Subject 240722:
+  sub-ag240722a_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240722a_EXP_bold_baseline_parcellated.csv: 34/1290 frames censored (2.6%)
+
+Subject 240723:
+  sub-ag240723a_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240723a_SHAM_bold_baseline_parcellated.csv: 130/1290 frames censored (10.1%)
+
+Subject 240724:
+  sub-ag240724a_SHAM_bold_CNO_parcellated.csv: 53/3480 frames censored (1.5%)
+  sub-ag240724a_SHAM_bold_baseline_parcellated.csv: 594/1290 frames censored (46.0%)
+  sub-ag240724b_SHAM_bold_CNO_parcellated.csv: 393/3480 frames censored (11.3%)
+  sub-ag240724b_SHAM_bold_baseline_parcellated.csv: 68/1290 frames censored (5.3%)
+  sub-ag240724c_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240724c_EXP_bold_baseline_parcellated.csv: 115/1290 frames censored (8.9%)
+
+Subject 240725:
+  sub-ag240725a_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240725a_EXP_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240725b_EXP_bold_CNO_parcellated.csv: 49/3480 frames censored (1.4%)
+  sub-ag240725b_EXP_bold_baseline_parcellated.csv: 36/1290 frames censored (2.8%)
+  sub-ag240725c_SHAM_bold_CNO_parcellated.csv: 34/3480 frames censored (1.0%)
+  sub-ag240725c_SHAM_bold_baseline_parcellated.csv: 203/1290 frames censored (15.7%)
+
+Subject 240726:
+  sub-ag240726a_SHAM_bold_CNO_parcellated.csv: 241/3480 frames censored (6.9%)
+  sub-ag240726a_SHAM_bold_baseline_parcellated.csv: 59/1290 frames censored (4.6%)
+  sub-ag240726b_EXP_bold_CNO_parcellated.csv: 44/3480 frames censored (1.3%)
+  sub-ag240726b_EXP_bold_baseline_parcellated.csv: 51/1290 frames censored (4.0%)
+  sub-ag240726c_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240726c_SHAM_bold_baseline_parcellated.csv: 44/1290 frames censored (3.4%)
+
+Subject 240729:
+  sub-ag240729a_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240729a_EXP_bold_baseline_parcellated.csv: 45/1290 frames censored (3.5%)
+  sub-ag240729b_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240729b_EXP_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240729c_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240729c_SHAM_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240729d_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240729d_SHAM_bold_baseline_parcellated.csv: 41/1290 frames censored (3.2%)
+
+Subject 240730:
+  sub-ag240730a_EXP_bold_CNO_parcellated.csv: 35/3480 frames censored (1.0%)
+  sub-ag240730a_EXP_bold_baseline_parcellated.csv: 62/1290 frames censored (4.8%)
+  sub-ag240730b_EXP_bold_CNO_parcellated.csv: 35/3480 frames censored (1.0%)
+  sub-ag240730b_EXP_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240730c_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240730c_SHAM_bold_baseline_parcellated.csv: 38/1290 frames censored (2.9%)
+  sub-ag240730d_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240730d_EXP_bold_baseline_parcellated.csv: 56/1290 frames censored (4.3%)
+
+Subject 240731:
+  sub-ag240731a_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240731a_EXP_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240731b_SHAM_bold_CNO_parcellated.csv: 34/3480 frames censored (1.0%)
+  sub-ag240731b_SHAM_bold_baseline_parcellated.csv: 218/1290 frames censored (16.9%)
+  sub-ag240731c_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240731c_SHAM_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+
+Subject 240801:
+  sub-ag240801b_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240801b_SHAM_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240801c_SHAM_bold_CNO_parcellated.csv: 219/3480 frames censored (6.3%)
+  sub-ag240801c_SHAM_bold_baseline_parcellated.csv: 1003/1290 frames censored (77.8%)
+  sub-ag240801d_EXP_bold_CNO_parcellated.csv: 41/3480 frames censored (1.2%)
+  sub-ag240801d_EXP_bold_baseline_parcellated.csv: 69/1290 frames censored (5.3%)
+
+Subject 240802:
+  sub-ag240802a_EXP_bold_CNO_parcellated.csv: 263/3480 frames censored (7.6%)
+  sub-ag240802a_EXP_bold_baseline_parcellated.csv: 39/1290 frames censored (3.0%)
+  sub-ag240802c_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240802c_EXP_bold_baseline_parcellated.csv: 34/1290 frames censored (2.6%)
+  sub-ag240802d_EXP_bold_CNO_parcellated.csv: 41/3480 frames censored (1.2%)
+  sub-ag240802d_EXP_bold_baseline_parcellated.csv: 38/1290 frames censored (2.9%)
+
+Subject 240806:
+  sub-ag240806a_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240806a_SHAM_bold_baseline_parcellated.csv: 76/1290 frames censored (5.9%)
+  sub-ag240806b_EXP_bold_CNO_parcellated.csv: 87/3480 frames censored (2.5%)
+  sub-ag240806b_EXP_bold_baseline_parcellated.csv: 56/1290 frames censored (4.3%)
+  sub-ag240806c_EXP_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240806c_EXP_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+
+Subject 240807:
+  sub-ag240807a_EXP_bold_CNO_parcellated.csv: 502/3480 frames censored (14.4%)
+  sub-ag240807a_EXP_bold_baseline_parcellated.csv: 110/1290 frames censored (8.5%)
+  sub-ag240807b_SHAM_bold_CNO_parcellated.csv: 42/3480 frames censored (1.2%)
+  sub-ag240807b_SHAM_bold_baseline_parcellated.csv: 52/1290 frames censored (4.0%)
+  sub-ag240807c_EXP_bold_CNO_parcellated.csv: 255/3480 frames censored (7.3%)
+  sub-ag240807c_EXP_bold_baseline_parcellated.csv: 91/1290 frames censored (7.1%)
+
+Subject 240808:
+  sub-ag240808a_SHAM_bold_CNO_parcellated.csv: 274/3480 frames censored (7.9%)
+  sub-ag240808a_SHAM_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240808b_SHAM_bold_CNO_parcellated.csv: 30/3480 frames censored (0.9%)
+  sub-ag240808b_SHAM_bold_baseline_parcellated.csv: 30/1290 frames censored (2.3%)
+  sub-ag240808c_SHAM_bold_CNO_parcellated.csv: 93/3480 frames censored (2.7%)
+  sub-ag240808c_SHAM_bold_baseline_parcellated.csv: 141/1290 frames censored (10.9%)
+
+
+Folder Bf_PV_awk:
+
+Subject 240924:
+  sub-ag240924a_SHAM_bold_CNO_parcellated.csv: 294/3600 frames censored (8.2%)
+  sub-ag240924a_SHAM_bold_baseline_parcellated.csv: 154/1290 frames censored (11.9%)
+  sub-ag240924b_EXP_bold_CNO_parcellated.csv: 1040/3600 frames censored (28.9%)
+  sub-ag240924b_EXP_bold_baseline_parcellated.csv: 378/1290 frames censored (29.3%)
+  sub-ag240924c_EXP_bold_CNO_parcellated.csv: 1047/3600 frames censored (29.1%)
+  sub-ag240924c_EXP_bold_baseline_parcellated.csv: 177/1290 frames censored (13.7%)
+
+Subject 240925:
+  sub-ag240925a_SHAM_bold_CNO_parcellated.csv: 527/3600 frames censored (14.6%)
+  sub-ag240925a_SHAM_bold_baseline_parcellated.csv: 248/1290 frames censored (19.2%)
+  sub-ag240925c_SHAM_bold_CNO_parcellated.csv: 143/3600 frames censored (4.0%)
+  sub-ag240925c_SHAM_bold_baseline_parcellated.csv: 121/1290 frames censored (9.4%)
+  sub-ag240925d_EXP_bold_CNO_parcellated.csv: 457/3600 frames censored (12.7%)
+  sub-ag240925d_EXP_bold_baseline_parcellated.csv: 50/1290 frames censored (3.9%)
+
+Subject 240926:
+  sub-ag240926a_EXP_bold_CNO_parcellated.csv: 274/3600 frames censored (7.6%)
+  sub-ag240926a_EXP_bold_baseline_parcellated.csv: 143/1290 frames censored (11.1%)
+  sub-ag240926c_SHAM_bold_CNO_parcellated.csv: 498/3600 frames censored (13.8%)
+  sub-ag240926c_SHAM_bold_baseline_parcellated.csv: 226/1290 frames censored (17.5%)
+  sub-ag240926d_EXP_bold_CNO_parcellated.csv: 353/3600 frames censored (9.8%)
+  sub-ag240926d_EXP_bold_baseline_parcellated.csv: 166/1290 frames censored (12.9%)
+
+Subject 240927:
+  sub-ag240927b_EXP_bold_CNO_parcellated.csv: 556/3600 frames censored (15.4%)
+  sub-ag240927b_EXP_bold_baseline_parcellated.csv: 161/1290 frames censored (12.5%)
+  sub-ag240927c_EXP_bold_CNO_parcellated.csv: 513/3600 frames censored (14.2%)
+  sub-ag240927c_EXP_bold_baseline_parcellated.csv: 149/1290 frames censored (11.6%)
+  sub-ag240927d_EXP_bold_CNO_parcellated.csv: 1217/3600 frames censored (33.8%)
+  sub-ag240927d_EXP_bold_baseline_parcellated.csv: 189/1290 frames censored (14.7%)
+
+Subject 240930:
+  sub-ag240930a_EXP_bold_CNO_parcellated.csv: 262/3600 frames censored (7.3%)
+  sub-ag240930a_EXP_bold_baseline_parcellated.csv: 115/1290 frames censored (8.9%)
+  sub-ag240930b_SHAM_bold_CNO_parcellated.csv: 395/3600 frames censored (11.0%)
+  sub-ag240930b_SHAM_bold_baseline_parcellated.csv: 120/1290 frames censored (9.3%)
+  sub-ag240930c_SHAM_bold_CNO_parcellated.csv: 332/3600 frames censored (9.2%)
+  sub-ag240930c_SHAM_bold_baseline_parcellated.csv: 106/1290 frames censored (8.2%)
+
+Subject 241001:
+  sub-ag241001a_SHAM_bold_CNO_parcellated.csv: 255/3600 frames censored (7.1%)
+  sub-ag241001a_SHAM_bold_baseline_parcellated.csv: 108/1290 frames censored (8.4%)
+  sub-ag241001b_SHAM_bold_CNO_parcellated.csv: 308/3600 frames censored (8.6%)
+  sub-ag241001b_SHAM_bold_baseline_parcellated.csv: 123/1290 frames censored (9.5%)
+  sub-ag241001c_EXP_bold_CNO_parcellated.csv: 627/3600 frames censored (17.4%)
+  sub-ag241001c_EXP_bold_baseline_parcellated.csv: 147/1290 frames censored (11.4%)
+
+Subject 241002:
+  sub-ag241002a_EXP_bold_CNO_parcellated.csv: 707/3600 frames censored (19.6%)
+  sub-ag241002a_EXP_bold_baseline_parcellated.csv: 205/1290 frames censored (15.9%)
+  sub-ag241002b_SHAM_bold_CNO_parcellated.csv: 637/3600 frames censored (17.7%)
+  sub-ag241002b_SHAM_bold_baseline_parcellated.csv: 271/1290 frames censored (21.0%)
+  sub-ag241002c_EXP_bold_CNO_parcellated.csv: 834/3600 frames censored (23.2%)
+  sub-ag241002c_EXP_bold_baseline_parcellated.csv: 99/1290 frames censored (7.7%)
+
+
