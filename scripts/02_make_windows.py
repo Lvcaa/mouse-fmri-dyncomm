@@ -10,7 +10,8 @@ MAX_CENSORED_TRS = 8
 MAX_SCAN_CENSORED_FRAC = 0.25
 
 script_dir = os.path.dirname(__file__)
-data_glob = os.path.join(script_dir, "..", "for_ludo", "Bf_DTA_awk", "*", "*.csv")
+DATA_ROOT = os.path.join(script_dir, "..", "for_ludo")
+data_glob = os.path.join(DATA_ROOT, "*", "*", "*.csv")
 output_path = os.path.join(script_dir, "window_summary.csv")
 
 
@@ -20,11 +21,21 @@ def check_line(line: pd.Series) -> bool:
     return roi_values.isna().all()
 
 
+def parse_dataset_path(csv_path: str) -> tuple[str, str]:
+    """Return (dataset, preproc_pipeline) for a for_ludo input CSV."""
+    rel_path = os.path.relpath(csv_path, DATA_ROOT)
+    parts = rel_path.split(os.sep)
+    if len(parts) < 3:
+        raise ValueError(f"Expected for_ludo/<dataset>/<preproc>/<file>.csv, got {csv_path}")
+    return parts[0], parts[1]
+
+
 def make_windows(csv_path: str) -> list[dict]:
 
     """ Takes a csv path, checks for censored TRs, and creates sliding windows of length WINDOW_LENGTH with step STEP_SIZE. Returns a list of dicts with window info.
     """
     df = pd.read_csv(csv_path)
+    dataset, preproc_pipeline = parse_dataset_path(csv_path)
 
     # Check which rows are censored (all ROIs are NaN)
     censored_rows = df.apply(check_line, axis=1)
@@ -48,6 +59,8 @@ def make_windows(csv_path: str) -> list[dict]:
 
         windows.append(
             {
+                "dataset": dataset,
+                "preproc_pipeline": preproc_pipeline,
                 "scan_id": os.path.basename(csv_path).replace(".csv", ""),
                 "csv_path": csv_path,
                 "window_id": len(windows),
