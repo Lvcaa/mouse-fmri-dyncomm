@@ -1,3 +1,42 @@
+## Docker Setup
+
+Build the Docker image from the repository root:
+
+```bash
+docker compose build
+```
+
+The first build may take a few minutes while dependencies (igraph, leidenalg)
+are installed for Python 3.12.13.
+
+Start an interactive shell inside a new container:
+
+```bash
+docker compose run --rm pipeline bash
+```
+
+The repository is mounted at `/app`, which is also the working directory inside
+the container. Run the analysis scripts in order:
+
+```bash
+python scripts/02_make_windows.py
+python scripts/03_compute_window_connectivity.py
+python scripts/04_run_community_detection.py
+python scripts/05_compute_flexibilty.py
+```
+
+Type `exit` to leave the container. Generated files remain available on the host
+because the repository is mounted into the container.
+
+To run one script directly without entering an interactive shell:
+
+```bash
+docker compose run --rm pipeline python scripts/04_run_community_detection.py
+```
+
+`docker compose exec pipeline bash` is also available, but only when the
+`pipeline` service is already running.
+
 # Progetto Gozzi — Dynamic Functional Connectivity Analysis
 
 This repository implements a sliding-window community detection pipeline on resting-state fMRI data from mouse brain, studying basal forebrain (BF) neuromodulation and its effect on functional network flexibility.
@@ -33,14 +72,16 @@ Within each cohort, files labelled `EXP` are the experimental group and `SHAM` a
 ├── scripts/                         # Analysis pipeline (run in order)
 │   ├── 02_make_windows.py           # Sliding windows (35 TR, step 3) + censoring filter
 │   ├── 03_compute_window_connectivity.py  # Per-window Pearson correlation matrix
-│   ├── 04_run_community_detection.py      # Louvain community detection per window
+│   ├── 04_run_community_detection.py      # Leiden community detection per window
 │   ├── 05_compute_flexibilty.py          # ROI-level flexibility across windows
 │   ├── censor_check/                # Censoring diagnostics
 │   ├── window_summary.csv           # Window inventory: keep/discard flags per scan
-│   ├── window_connectivity/         # Output of script 03 — one correlation matrix CSV per window
-│   └── window_communities/          # Output of script 04 — one CSV per scan, organised by subject
-│       └── sub-<subject>/
-│           └── <scan_id>.csv        # Columns: window_id, Node, Community
+│   ├── window_connectivity/         # Output of script 03, nested by dataset/preproc/subject
+│   │   └── <dataset>/<preproc_pipeline>/sub-<subject>/
+│   │       └── <scan_id>_window_0000.csv
+│   └── window_communities/          # Output of script 04, nested by dataset/preproc/subject
+│       └── <dataset>/<preproc_pipeline>/sub-<subject>/
+│           └── <scan_id>.csv        # Columns: Node, flexibility, gamma, interslice_weight, n_runs, n_windows
 │
 ├── reference/
 │   └── CSV_FORMAT.md                # Detailed spec for the parcellated timeseries CSV format
@@ -55,11 +96,11 @@ Within each cohort, files labelled `EXP` are the experimental group and `SHAM` a
 
 1. **`02_make_windows.py`** — Slides a 35-TR window (step = 3 TR) over each scan. Windows with ≥9 censored TRs (>25% of 35) are flagged and excluded. Results are written to `window_summary.csv`.
 
-2. **`03_compute_window_connectivity.py`** — For each kept window, removes censored rows, computes the 16×16 ROI Pearson correlation matrix, clips negative values to zero, and zeroes the diagonal. Outputs one CSV per window to `window_connectivity/`.
+2. **`03_compute_window_connectivity.py`** — For each kept window, removes censored rows, computes the 16×16 ROI Pearson correlation matrix, and zeroes the diagonal. Negative correlations are retained in the saved matrix but ignored later by the positive-edge graph builder. Outputs one CSV per window under `window_connectivity/<dataset>/<preproc_pipeline>/<subject>/`.
 
-3. **`04_run_community_detection.py`** — Builds a weighted undirected graph from each correlation matrix and runs Louvain community detection (seed=123). Results are saved to `window_communities/<subject>/<scan_id>.csv` with columns `window_id, Node, Community`.
+3. **`04_run_community_detection.py`** — Builds a weighted undirected graph from each correlation matrix and runs temporal Leiden community detection. Mean per-ROI flexibility is saved to `window_communities/<dataset>/<preproc_pipeline>/<subject>/<scan_id>.csv`. See [`docs/04_community_detection.md`](docs/04_community_detection.md) for a full walkthrough of the execution flow, parameters, and output format.
 
-4. **`05_compute_flexibilty.py`** — Computes per-ROI flexibility (community switch rate across consecutive valid windows) and summarises results per scan, condition, and group.
+4. **`05_compute_flexibilty.py`** — Aggregates per-scan flexibility outputs into `scripts/flexibility/flexibility_scores.csv`, preserving dataset, preprocessing, cohort, state, subject, condition, and phase metadata.
 
 ## Data Format
 
@@ -82,8 +123,5 @@ python scripts/04_run_community_detection.py
 python scripts/05_compute_flexibilty.py
 ```
 
-Or with Docker:
-
-```bash
-docker-compose up
-```
+For the Docker workflow, see [Docker Setup](#docker-setup) at the top of this
+README.
