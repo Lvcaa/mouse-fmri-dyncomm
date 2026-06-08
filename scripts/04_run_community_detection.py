@@ -82,6 +82,7 @@ def build_igraph(df: pd.DataFrame) -> ig.Graph:
     graph = ig.Graph()
     graph.add_vertices(len(roi_names))
     graph.vs["name"] = roi_names
+    graph.vs["id"] = roi_names
 
     corr_array = df.to_numpy(dtype=float)
     row_indices, col_indices = np.triu_indices(len(roi_names), k=1)
@@ -98,7 +99,7 @@ def build_igraph(df: pd.DataFrame) -> ig.Graph:
 
 
 def _multiprocessing_context():
-    """Prefer fork on Linux so workers do not pickle huge igraph layers."""
+    """Prefer fork on Linux so workers can inherit the temporal graph list."""
     try:
         return multiprocessing.get_context("fork")
     except ValueError:
@@ -106,75 +107,64 @@ def _multiprocessing_context():
 
 
 # ── Worker-global state ────────────────────────────────────────────────────────
-# Set once per worker process via _init_worker; the supra-graph is never
+# Set once per worker process via _init_worker; the temporal graph list is never
 # pickled into individual task arguments.
-_worker_supra_graph = None
-_worker_n_windows = None
+_worker_graphs = None
 _worker_n_transitions = None
-_worker_n_nodes = None
 _worker_gamma = None
+_worker_omega = None
 
 
-def _init_worker(supra_graph, n_windows, n_transitions, n_nodes, gamma):
-    """Load supra-graph into each worker process exactly once.
+def _init_worker(graphs, n_transitions, gamma, omega):
+    """Load temporal graphs into each worker process exactly once.
 
     Called by ProcessPoolExecutor as an initializer — runs once per worker
-    at startup, not once per task. With fork the graph is COW-inherited and
-    never actually copied.
+    at startup, not once per task. With fork the graphs are COW-inherited.
     """
-    global _worker_supra_graph, _worker_n_windows, _worker_n_transitions
-    global _worker_n_nodes, _worker_gamma
-    _worker_supra_graph = supra_graph   # single graph: T*N nodes, intra + interslice edges
-    _worker_n_windows = n_windows       # T
+    global _worker_graphs, _worker_n_transitions, _worker_gamma, _worker_omega
+    _worker_graphs = graphs
     _worker_n_transitions = n_transitions  # T-1
-    _worker_n_nodes = n_nodes           # N (ROIs per window)
     _worker_gamma = gamma
+    _worker_omega = omega
 
 
 def _leiden_single_run(seed: int) -> list[float]:
-    """Run one Leiden optimisation on the supra-graph and return per-node flexibility.
+    """Run one layer-aware temporal Leiden optimisation.
 
-    The supra-graph vertex layout is:  node t*N+i  =  ROI i in window t.
-    Intra-window correlation edges couple ROIs within each window block.
-    Interslice edges  (t*N+i) — ((t+1)*N+i)  with weight ω couple the same
-    ROI across adjacent windows, encoding temporal continuity.
-
-    A single find_partition call replaces the T+1 partition multiplex approach,
-    reducing cost from O(T²·N) to O(T·N) per sweep.
+    CPM quality is evaluated separately within each time slice, while matching
+    ROI IDs in adjacent slices are coupled with weight omega.
     """
-    supra_graph = _worker_supra_graph
-    n_windows = _worker_n_windows
+    graphs = _worker_graphs
     n_transitions = _worker_n_transitions
-    n_nodes = _worker_n_nodes
     gamma = _worker_gamma
+    omega = _worker_omega
 
-    partition = la.find_partition(
-        supra_graph,
+    memberships, improvement = la.find_partition_temporal(
+        graphs,
         la.CPMVertexPartition,
-        weights="weight",
+        interslice_weight=omega,
+        vertex_id_attr="id",
+        weight_attr="weight",
         resolution_parameter=gamma,
         seed=seed,
     )
-    # len(partition.membership)    → 10,624
-    # partition.membership[:5]     → [0, 0, 1, 0, 2]   (community label per supra-vertex)
-    # partition.membership[0]      → community of DMNa in window 0
-    # partition.membership[16]     → community of DMNa in window 1 (same or different)
+    if not np.isfinite(improvement):
+        raise RuntimeError(f"Temporal Leiden returned invalid improvement: {improvement}")
 
-    # membership is a flat T*N vector; reshape to (T, N).
-    # entry [t, i] = community label of ROI i in window t.
-    membership_matrix = np.array(partition.membership, dtype=np.int32).reshape(n_windows, n_nodes)
-    # membership_matrix.shape      → (664, 16)
-    # membership_matrix[0]         → [0, 0, 1, 0, 2, 1, 0, 3, 0, 0, 1, 2, 2, 1, 3, 0]
-    # membership_matrix[1]         → [0, 0, 1, 0, 2, 1, 0, 3, 0, 0, 1, 2, 2, 1, 3, 0]  ← stable
-    # membership_matrix[200]       → [1, 1, 0, 1, 0, 2, 1, 0, 1, 1, 0, 3, 3, 0, 0, 1]  ← switched
+    # Retrieve membership matrix and save it
+    membership_matrix = np.asarray(memberships, dtype=np.int32)
+    expected_shape = (len(graphs), graphs[0].vcount())
+    if membership_matrix.shape != expected_shape:
+        raise RuntimeError(
+            f"Unexpected temporal membership shape {membership_matrix.shape}; "
+            f"expected {expected_shape}"
+        )
 
     # Count transitions where community label changed between adjacent windows.
     switches = np.sum(membership_matrix[1:] != membership_matrix[:-1], axis=0)  # (N,)
-    # switches  → [591, 631, 645, ...]   raw count of community changes per ROI across 663 transitions
 
-    # Normalise to [0, 1]: fraction of T-1 transitions with a community switch.
+    # Normalise to [0, 1] flexibility: fraction of T-1 transitions with a community switch.
     return (switches / n_transitions).tolist()
-    # return → [0.891, 0.951, 0.972, ...]   one flexibility value per ROI for this run
 
 
 def run_community_detection(
@@ -186,17 +176,9 @@ def run_community_detection(
 ) -> pd.DataFrame:
     """Run temporal Leiden community detection N_RUNS times and return mean flexibility.
 
-    Builds a supra-adjacency graph (Mucha et al. 2010) where each time window
-    occupies a contiguous block of N vertices:
-
-        vertex  t*N + i  =  ROI i in window t
-
-    Edges:
-        intra-window  (t*N+r) — (t*N+c)  weight = Pearson correlation  (positive only)
-        interslice    (t*N+i) — ((t+1)*N+i)  weight = ω  (adjacent windows only)
-
-    A single leidenalg.find_partition call over this one graph replaces the old
-    T+1 layered multiplex, reducing cost from O(T²·N) to O(T·N) per sweep.
+    Each correlation graph is one time slice. ``find_partition_temporal``
+    evaluates CPM quality within each slice and couples matching ROI IDs in
+    adjacent slices with weight omega.
 
     Flexibility for ROI i = fraction of the T-1 consecutive-window transitions
     where its community label changed, averaged across N_RUNS independent runs.
@@ -216,6 +198,8 @@ def run_community_detection(
         df = read_window(path)
         if node_names is None:
             node_names = list(df.columns)
+        elif list(df.columns) != node_names:
+            raise ValueError(f"ROI columns or order differ across windows: {path}")
         graphs.append(build_igraph(df))
     _step("loading", f"{n_windows} windows", time.time() - t0)
     # len(graphs)           → 664
@@ -228,45 +212,12 @@ def run_community_detection(
     if n_transitions == 0:
         return pd.DataFrame({"Node": node_names, "flexibility": [float("nan")] * n_nodes})
 
-    # ── Step 2: build supra-adjacency graph ───────────────────────────────────
-    # One graph, T*N vertices.  Vertex layout: t*N+i = ROI i in window t.
-    # Intra-window edges carry correlation weights; interslice chain edges
-    # carry weight ω and connect each ROI to itself in the adjacent window only.
-    t0 = time.time()
-    intra_sources: list[int] = []
-    intra_targets: list[int] = []
-    intra_weights: list[float] = []
-    for window_idx, window_graph in enumerate(graphs):
-        vertex_offset = window_idx * n_nodes
-        for edge in window_graph.es:
-            intra_sources.append(vertex_offset + edge.source)
-            intra_targets.append(vertex_offset + edge.target)
-            intra_weights.append(edge["weight"])
-
-    window_indices = np.repeat(np.arange(n_transitions), n_nodes)
-    roi_indices    = np.tile(np.arange(n_nodes), n_transitions)
-    interslice_src = (window_indices * n_nodes + roi_indices).tolist()
-    interslice_tgt = ((window_indices + 1) * n_nodes + roi_indices).tolist()
-
-    supra = ig.Graph()
-    supra.add_vertices(n_windows * n_nodes)
-    supra.add_edges(list(zip(intra_sources + interslice_src, intra_targets + interslice_tgt)))
-    supra.es["weight"] = intra_weights + [omega] * (n_transitions * n_nodes)
-    _step("building", "supra-graph", time.time() - t0)
-    # supra.vcount()  → 10,624   (664 windows × 16 ROIs)
-    # supra.ecount()  → ~73,000  (62,495 intra-window + 10,608 interslice)
-    # vertex layout:  t*16+i  =  ROI i in window t
-    #   vertex   0  = DMNa in window   0
-    #   vertex  16  = DMNa in window   1  ← connected to vertex 0 via ω edge
-    #   vertex  80  = DMNa in window   5
-    #   vertex 10608 = DMNa in window 663
-
-    # ── Step 3: run Leiden ────────────────────────────────────────────────────
+    # ── Step 2: run layer-aware temporal Leiden ───────────────────────────────
     n_runs = max(1, n_runs)
     run_workers = max(1, min(run_workers, n_runs))
     seeds = [int.from_bytes(os.urandom(4), "little") % (2**31 - 1) for _ in range(n_runs)]
 
-    init_args = (supra, n_windows, n_transitions, n_nodes, gamma)
+    init_args = (graphs, n_transitions, gamma, omega)
 
     t0 = time.time()
     if run_workers == 1:
@@ -280,8 +231,8 @@ def run_community_detection(
         with ProcessPoolExecutor(
             max_workers=run_workers,
             mp_context=mp_context,
-            initializer=_init_worker,  # runs once per worker process at startup
-            initargs=init_args,        # multiplex data pickled run_workers times, not n_runs times
+            initializer=_init_worker,
+            initargs=init_args,
         ) as executor:
             # Each task now only sends an integer seed across the process boundary
             futures = {executor.submit(_leiden_single_run, seed): i for i, seed in enumerate(seeds)}
@@ -290,16 +241,10 @@ def run_community_detection(
     _step("running", f"{n_runs} × Leiden  ({run_workers} workers)", time.time() - t0)
 
     flexibility_sum = [sum(run[i] for run in all_runs) for i in range(n_nodes)]
-    # flexibility_sum[0]  → sum of DMNa flexibility across 100 runs, e.g. 89.7
-    # divided by 100 below → mean flexibility 0.897
 
     return pd.DataFrame({
         "Node": node_names,
         "flexibility": [s / len(all_runs) for s in flexibility_sum],
-        # Node     flexibility
-        # DMNa     0.897       ← switches community in ~90% of window transitions
-        # BF       0.943
-        # CTXsp    0.987       ← highest flexibility: rarely stays in one community
         "gamma": gamma,
         "interslice_weight": omega,
         "n_runs": len(all_runs),
