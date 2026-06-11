@@ -5,7 +5,7 @@ __pycache__/
 scripts/window_summary.csv
 scripts/window_connectivity/
 scripts/window_communities/
-
+scripts/community_parameter_sweeps/
 # Local environment files
 .env
 .venv/
