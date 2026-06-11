@@ -2,8 +2,11 @@
 set -euo pipefail
 
 INSTANCE_NAME="${GOZZI_INSTANCE_NAME:-gozzi_pipeline}"
-PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-IMAGE="${PROJECT_ROOT}/containers/progetto_gozzi.sif"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${SCRIPT_DIR}"
+CONTAINERS_DIR="${PROJECT_ROOT}/containers"
+IMAGE="${GOZZI_IMAGE:-${CONTAINERS_DIR}/progetto_gozzi.sif}"
+DEFINITION="${GOZZI_DEFINITION:-${CONTAINERS_DIR}/progetto_gozzi.def}"
 
 instance_is_running() {
   apptainer instance list | awk 'NR > 1 { print $1 }' | grep -Fxq "${INSTANCE_NAME}"
@@ -16,6 +19,19 @@ stop_instance() {
   fi
 }
 
+build_image() {
+  if [[ ! -f "${DEFINITION}" ]]; then
+    echo "Container definition not found: ${DEFINITION}" >&2
+    exit 1
+  fi
+
+  echo "Building container image: ${IMAGE}"
+  (
+    cd "${PROJECT_ROOT}"
+    apptainer build "${IMAGE}" "${DEFINITION}"
+  )
+}
+
 run_pipeline() {
   if instance_is_running; then
     echo "Apptainer instance ${INSTANCE_NAME} is already running." >&2
@@ -25,6 +41,7 @@ run_pipeline() {
 
   if [[ ! -f "${IMAGE}" ]]; then
     echo "Container image not found: ${IMAGE}" >&2
+    echo "Build it with: ${SCRIPT_DIR}/container_pipeline.sh build" >&2
     exit 1
   fi
 
@@ -44,6 +61,9 @@ run_pipeline() {
 }
 
 case "${1:-}" in
+  build)
+    build_image
+    ;;
   run)
     run_pipeline
     ;;
@@ -58,7 +78,7 @@ case "${1:-}" in
     apptainer instance list
     ;;
   *)
-    echo "Usage: $0 {run|stop|status}" >&2
+    echo "Usage: $0 {build|run|stop|status}" >&2
     exit 2
     ;;
 esac

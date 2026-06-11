@@ -54,6 +54,16 @@ Four cohorts are analysed:
 
 Within each cohort, files labelled `EXP` are the experimental group and `SHAM` are controls.
 
+**DTA** — permanent BF lesion. Diphtheria toxin A kills neurons expressing its receptor. EXP
+mice have BF neurons ablated; SHAM mice receive the injection without an active toxin. The
+manipulation is structural and irreversible.
+
+**PV** — reversible chemogenetic silencing of BF parvalbumin interneurons. EXP mice express
+an inhibitory DREADD (hM4Di) in BF PV neurons and receive CNO to activate it; SHAM mice have
+the same setup without functional DREADD expression or receive saline instead of CNO. The
+effect is transient and limited to the CNO period (> 22 min post-injection), which is why PV
+scans are already split into `baseline` and `CNO` segments before entering the pipeline.
+
 ## Repository Structure
 
 ```

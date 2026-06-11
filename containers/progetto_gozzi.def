@@ -6,7 +6,7 @@ From: python:3.12.13-slim
     Description Progetto Gozzi pipeline — community detection and flexibility analysis
 
 %files
-    requirements.txt /opt/requirements.txt
+    ../requirements.txt /opt/requirements.txt
 
 %post
     apt-get update && apt-get install -y --no-install-recommends \
@@ -28,24 +28,27 @@ From: python:3.12.13-slim
     exec sleep infinity
 
 %help
-    Singularity container for the Progetto Gozzi pipeline.
+    Apptainer container for the Progetto Gozzi pipeline.
 
     Build:
-        singularity build containers/progetto_gozzi.sif containers/progetto_gozzi.def
+        ./container_pipeline.sh build
 
-    Run the full pipeline from the project root:
-        singularity run containers/progetto_gozzi.sif
+    From inside the containers directory:
+        ../container_pipeline.sh build
+
+    Run the full pipeline:
+        ./container_pipeline.sh run
 
     Run as a named instance with reliable whole-job shutdown:
         ./container_pipeline.sh run
         ./container_pipeline.sh stop
 
     Run an arbitrary command (e.g. a single script):
-        singularity exec containers/progetto_gozzi.sif python scripts/04_run_community_detection.py
+        apptainer exec containers/progetto_gozzi.sif python scripts/04_run_community_detection.py
 
     Open an interactive shell:
-        singularity shell containers/progetto_gozzi.sif
+        apptainer shell containers/progetto_gozzi.sif
 
-    Singularity automatically bind-mounts your current working directory, so
+    Apptainer automatically bind-mounts your current working directory, so
     run all commands from the project root and the scripts will find data files
     at the paths they expect.  No --bind flag needed in the common case.
