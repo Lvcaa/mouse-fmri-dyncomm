@@ -4,6 +4,9 @@ __pycache__/
 # Generated pipeline outputs
 outputs/
 
+# Local Singularity/Apptainer container images
+*.sif
+
 # Local environment files
 .env
 .venv/
