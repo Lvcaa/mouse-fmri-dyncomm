@@ -1,7 +1,10 @@
 setuptools<81
 pandas
 numpy
+scipy
 networkx
 SimpleITK
 igraph>=0.10,<0.12
 leidenalg>=0.10,<1.0
+mistune>=3,<4
+toyplot>=2.1,<3

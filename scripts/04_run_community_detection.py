@@ -1,4 +1,3 @@
-import argparse
 import re
 import time
 import numpy as np
@@ -12,8 +11,14 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from glob import glob
 
-CONNECTIVITY_DIR = os.path.join(os.path.dirname(__file__), "window_connectivity")
-COMMUNITIES_DIR = os.path.join(os.path.dirname(__file__), "window_communities")
+from run_logging import record_run
+
+OUTPUTS_ROOT = os.path.join(os.path.dirname(__file__), "..", "outputs")
+CONNECTIVITY_DIR = os.path.join(OUTPUTS_ROOT, "window_connectivity")
+OUTPUTS_DIR = os.path.join(OUTPUTS_ROOT, "community_detection")
+
+# Dataset to process, hardcoded for now.
+DATASET = "Bf_PV_anes"
 
 # ── Algorithm parameters (from TO_DO.md) ──────────────────────────────────────
 # Resolution parameter (γ): controls community granularity.
@@ -21,17 +26,17 @@ COMMUNITIES_DIR = os.path.join(os.path.dirname(__file__), "window_communities")
 #   edge density > γ. With Pearson correlations in [0, 1], γ=1 forces all nodes
 #   into singletons → flexibility = 0 always. Lower γ (e.g. 0.1–0.3) produces
 #   biologically meaningful communities. Tune as needed.
-GAMMA = 0.1
+GAMMA = 0.35
 
 # Interslice coupling (ω): penalises a node for switching communities between
 # consecutive windows. Higher → more stable partitions across time.
-INTERSLICE_WEIGHT = 0.5
+INTERSLICE_WEIGHT = 0.25
 
 # Number of independent Leiden runs per scan. Each run gets a fresh random
 # seed, and flexibility is averaged across all runs.
-N_RUNS = 100
-SCAN_WORKERS = 1
-RUN_WORKERS = 1
+N_RUNS = 20
+SCAN_WORKERS = 8
+RUN_WORKERS = 8
 
 # ── Logging helpers ────────────────────────────────────────────────────────────
 _DIVIDER = "═" * 64
@@ -182,9 +187,11 @@ def run_community_detection(
 
     Flexibility for ROI i = fraction of the T-1 consecutive-window transitions
     where its community label changed, averaged across N_RUNS independent runs.
+    flexibility_std is the standard deviation of that per-run fraction across
+    the N_RUNS runs, i.e. how much the stochastic Leiden runs disagree on ROI i.
 
     Returns a DataFrame with columns:
-        Node | flexibility | gamma | interslice_weight | n_runs | n_windows
+        Node | flexibility | flexibility_std | gamma | interslice_weight | n_runs | n_windows
     """
     sorted_windows = sorted(windows, key=lambda x: x[0])
     n_windows = len(sorted_windows)
@@ -210,7 +217,11 @@ def run_community_detection(
     n_nodes = len(node_names)
 
     if n_transitions == 0:
-        return pd.DataFrame({"Node": node_names, "flexibility": [float("nan")] * n_nodes})
+        return pd.DataFrame({
+            "Node": node_names,
+            "flexibility": [float("nan")] * n_nodes,
+            "flexibility_std": [float("nan")] * n_nodes,
+        })
 
     # ── Step 2: run layer-aware temporal Leiden ───────────────────────────────
     n_runs = max(1, n_runs)
@@ -240,11 +251,12 @@ def run_community_detection(
                 all_runs[futures[future]] = future.result()
     _step("running", f"{n_runs} × Leiden  ({run_workers} workers)", time.time() - t0)
 
-    flexibility_sum = [sum(run[i] for run in all_runs) for i in range(n_nodes)]
+    runs_array = np.asarray(all_runs, dtype=float)  # shape (n_runs, n_nodes)
 
     return pd.DataFrame({
         "Node": node_names,
-        "flexibility": [s / len(all_runs) for s in flexibility_sum],
+        "flexibility": runs_array.mean(axis=0),
+        "flexibility_std": runs_array.std(axis=0),
         "gamma": gamma,
         "interslice_weight": omega,
         "n_runs": len(all_runs),
@@ -273,9 +285,9 @@ def parse_filename(path: str) -> tuple[str, str, int]:
 def connectivity_context(connectivity_dir: str, path: str) -> str:
     """Return dataset/preprocessing context for subject-nested connectivity files."""
     rel_parts = os.path.relpath(path, connectivity_dir).split(os.sep)
-    if len(rel_parts) != 4:
+    if len(rel_parts) != 5:
         raise ValueError(
-            f"Expected <dataset>/<preproc>/<subject>/<window>.csv under {connectivity_dir}, got {path}"
+            f"Expected <dataset>/<preproc>/<animal_id>/<subject_id>/<window>.csv under {connectivity_dir}, got {path}"
         )
     return os.path.join(rel_parts[0], rel_parts[1])
 
@@ -318,8 +330,8 @@ def run_all(
 
     Output CSV columns: Node | flexibility
     """
-    connectivity_files = sorted(glob(os.path.join(connectivity_dir, "*", "*", "*", "*.csv")))
-    assert connectivity_files, f"No connectivity matrices found in {connectivity_dir}"
+    connectivity_files = sorted(glob(os.path.join(connectivity_dir, DATASET, "*", "*", "*", "*.csv")))
+    assert connectivity_files, f"No connectivity matrices found for dataset {DATASET!r} in {connectivity_dir}"
 
     # Group window files by dataset/preprocessing context, subject, and scan.
     groups: dict[tuple[str, str, str], list[tuple[int, str]]] = defaultdict(list)
@@ -361,10 +373,12 @@ def run_all(
     print(f"  All done — {n_scans} scans in {_fmt_time(time.time() - t0_all)}")
     print(_DIVIDER)
 
+    return n_scans
+
 
 def test_one_connectivity_file():
     """Smoke test on the first available scan (first 5 windows, 5 runs)."""
-    connectivity_files = sorted(glob(os.path.join(CONNECTIVITY_DIR, "*", "*", "*", "*.csv")))
+    connectivity_files = sorted(glob(os.path.join(CONNECTIVITY_DIR, "*", "*", "*", "*", "*.csv")))
     assert connectivity_files, f"No connectivity matrices found in {CONNECTIVITY_DIR}"
 
     stem = os.path.basename(connectivity_files[0]).replace(".csv", "")
@@ -385,26 +399,21 @@ def test_one_connectivity_file():
     print(result)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Run temporal Leiden community detection.")
-    parser.add_argument("--connectivity-dir", default=CONNECTIVITY_DIR)
-    parser.add_argument("--output-dir", default=COMMUNITIES_DIR)
-    parser.add_argument("--n-runs", type=int, default=N_RUNS)
-    parser.add_argument("--scan-workers", type=int, default=SCAN_WORKERS)
-    parser.add_argument("--run-workers", type=int, default=RUN_WORKERS)
-    parser.add_argument("--gamma", type=float, default=GAMMA)
-    parser.add_argument("--omega", type=float, default=INTERSLICE_WEIGHT)
-    return parser.parse_args()
-
-
 if __name__ == "__main__":
-    args = parse_args()
-    run_all(
-        args.connectivity_dir,
-        args.output_dir,
-        n_runs=args.n_runs,
-        gamma=args.gamma,
-        omega=args.omega,
-        scan_workers=args.scan_workers,
-        run_workers=args.run_workers,
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = os.path.join(OUTPUTS_DIR, f"leiden_flex_{N_RUNS}_{timestamp}")
+    n_scans = run_all(CONNECTIVITY_DIR, output_dir)
+
+    record_run(
+        "04_run_community_detection",
+        output_dir,
+        params={
+            "dataset": DATASET,
+            "gamma": GAMMA,
+            "interslice_weight": INTERSLICE_WEIGHT,
+            "n_runs": N_RUNS,
+            "scan_workers": SCAN_WORKERS,
+            "run_workers": RUN_WORKERS,
+        },
+        n_scans=n_scans,
     )
