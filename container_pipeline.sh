@@ -60,20 +60,12 @@ run_pipeline() {
     bash -c '
       set -euo pipefail
 
-      echo "Step 1/4: making windows"
+      echo "Step 1/2: making windows"
       python scripts/02_make_windows.py
 
       echo
-      echo "Step 2/4: computing window connectivity"
+      echo "Step 2/2: computing window connectivity"
       python scripts/03_compute_window_connectivity.py
-
-      echo
-      echo "Step 3/4: running temporal Leiden community detection"
-      python scripts/04_run_community_detection.py
-
-      echo
-      echo "Step 4/4: aggregating flexibility scores"
-      python scripts/05_compute_flexibilty.py
 
       echo
       echo "Pipeline complete."

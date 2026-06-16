@@ -1,16 +1,16 @@
 """
 Aggregate per-scan flexibility scores into a single wide-format table.
 
-Script 04 already runs Leiden N_RUNS=100 times per scan and writes the mean
-flexibility per node to:
+Script 04 runs Leiden N_RUNS times per scan and writes the mean flexibility
+per node to the most recent:
 
-    window_communities/<subject_folder>/<scan_id>.csv
+    outputs/leiden_flex_<n_runs>_<timestamp>/<dataset>/<preproc>/<subject>/<scan_id>.csv
 
 with columns:
-    Node | flexibility
+    Node | flexibility | flexibility_std | ...
 
 This script collects those files and pivots them into the final table:
-    subject | condition | DMNa | DMNp | SAL | ...
+    subject_id | condition | DMNa | DMNp | SAL | ...
 """
 
 import os
@@ -18,12 +18,22 @@ import pandas as pd
 from datetime import datetime
 from glob import glob
 
-WINDOW_COMMUNITIES_DIR = os.path.join(os.path.dirname(__file__), "window_communities")
-FLEXIBILITY_DIR = os.path.join(os.path.dirname(__file__), "flexibility")
+from run_logging import record_run
+
+OUTPUTS_ROOT = os.path.join(os.path.dirname(__file__), "..", "outputs")
+OUTPUTS_DIR = os.path.join(OUTPUTS_ROOT, "community_detection")
+FLEXIBILITY_DIR = os.path.join(OUTPUTS_ROOT, "flexibility")
+
+
+def latest_leiden_output_dir(outputs_dir: str) -> str:
+    """Return the most recently produced outputs/leiden_flex_<n_runs>_<timestamp>/ dir."""
+    candidates = glob(os.path.join(outputs_dir, "leiden_flex_*"))
+    assert candidates, f"No leiden_flex_* output directories found in {outputs_dir}"
+    return max(candidates, key=os.path.getmtime)
 
 
 def parse_scan_id(path: str) -> tuple[str, str, str]:
-    """Return (scan_id, condition, phase) from a community CSV path.
+    """Return (subject_id, condition, phase) from a community CSV path.
 
     Examples:
       sub-ag231031b_SHAM_bold_parcellated.csv -> ('sub-ag231031b', 'SHAM', 'full')
@@ -31,7 +41,7 @@ def parse_scan_id(path: str) -> tuple[str, str, str]:
     """
     stem = os.path.basename(path).replace(".csv", "")
     parts = stem.split("_")
-    scan_id = parts[0]
+    subject_id = parts[0]
     condition = parts[1]
     if "CNO" in parts:
         phase = "CNO"
@@ -39,7 +49,7 @@ def parse_scan_id(path: str) -> tuple[str, str, str]:
         phase = "baseline"
     else:
         phase = "full"
-    return scan_id, condition, phase
+    return subject_id, condition, phase
 
 
 def parse_dataset_context(communities_dir: str, path: str) -> dict[str, str]:
@@ -48,11 +58,11 @@ def parse_dataset_context(communities_dir: str, path: str) -> dict[str, str]:
     if len(rel_parts) >= 4:
         dataset = rel_parts[0]
         preproc_pipeline = rel_parts[1]
-        subject_folder = rel_parts[-2]
+        animal_id = rel_parts[-2]
     else:
         dataset = ""
         preproc_pipeline = ""
-        subject_folder = rel_parts[-2] if len(rel_parts) >= 2 else ""
+        animal_id = rel_parts[-2] if len(rel_parts) >= 2 else ""
 
     dataset_parts = dataset.split("_")
     cohort = dataset_parts[1] if len(dataset_parts) >= 3 else ""
@@ -64,7 +74,7 @@ def parse_dataset_context(communities_dir: str, path: str) -> dict[str, str]:
         "preproc_pipeline": preproc_pipeline,
         "cohort": cohort,
         "state": state,
-        "subject_folder": subject_folder,
+        "animal_id": animal_id,
     }
 
 
@@ -77,15 +87,15 @@ def compute_flexibility(communities_dir: str, output_dir: str):
 
     rows = []
     for path in flex_files:
-        scan_id, condition, phase = parse_scan_id(path)
+        subject_id, condition, phase = parse_scan_id(path)
         df = pd.read_csv(path)  # columns: Node, flexibility
 
         row = parse_dataset_context(communities_dir, path)
-        row.update({"subject": scan_id, "condition": condition, "phase": phase})
+        row.update({"subject_id": subject_id, "condition": condition, "phase": phase})
         row.update(dict(zip(df["Node"], df["flexibility"])))
         rows.append(row)
         label = row["dataset"]
-        print(f"Processed {label}/{scan_id} ({condition}, {phase})")
+        print(f"Processed {label}/{subject_id} ({condition}, {phase})")
 
     result = pd.DataFrame(rows)
     result["last_run"] = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -93,6 +103,16 @@ def compute_flexibility(communities_dir: str, output_dir: str):
     result.to_csv(output_path, index=False)
     print(f"Saved {output_path}")
 
+    return len(flex_files)
+
 
 if __name__ == "__main__":
-    compute_flexibility(WINDOW_COMMUNITIES_DIR, FLEXIBILITY_DIR)
+    source_dir = latest_leiden_output_dir(OUTPUTS_DIR)
+    n_scans = compute_flexibility(source_dir, FLEXIBILITY_DIR)
+
+    record_run(
+        "05_compute_flexibilty",
+        FLEXIBILITY_DIR,
+        params={"source_dir": os.path.relpath(source_dir, OUTPUTS_ROOT)},
+        n_scans=n_scans,
+    )

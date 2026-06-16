@@ -21,8 +21,9 @@ import pandas as pd
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_DATASET_DIR = SCRIPT_DIR / "window_connectivity" / "Bf_DTA_anes"
-DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "community_parameter_sweeps"
+OUTPUTS_ROOT = SCRIPT_DIR.parent / "outputs"
+DEFAULT_DATASET_DIR = OUTPUTS_ROOT / "window_connectivity" / "Bf_DTA_anes"
+DEFAULT_OUTPUT_DIR = OUTPUTS_ROOT / "community_parameter_sweeps"
 DIVIDER = "=" * 72
 
 _worker_graphs = None
@@ -115,7 +116,7 @@ def discover_mice(dataset_dir: Path, preprocessing_folder: str | None):
         if not date_folder.is_dir():
             continue
         date_name = date_folder.name
-        for csv_path in date_folder.glob("*.csv"):
+        for csv_path in date_folder.glob("*/*.csv"):
             mice[date_name][get_mouse_name(str(csv_path))].append(str(csv_path))
 
     for date_name in mice:

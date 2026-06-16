@@ -90,9 +90,9 @@ scans are already split into `baseline` and `CNO` segments before entering the p
 │   ├── window_summary.csv           # Window inventory: keep/discard flags per scan
 │   ├── report_mouse_censoring/      # Scan-level censoring report from script 02
 │   │   └── skipped_scans.csv
-│   ├── window_connectivity/         # Output of script 03, nested by dataset/preproc/subject
+│   ├── window_connectivity/         # Output of script 03, nested by dataset/preproc/animal/subject
 │   │   ├── connectivity_summary.csv # Retained-window counts/ratios per scan
-│   │   └── <dataset>/<preproc_pipeline>/sub-<subject>/
+│   │   └── <dataset>/<preproc_pipeline>/sub-<animal_id>/sub-<subject_id>/
 │   │       └── <scan_id>_window_0000.csv
 │   ├── community_detection/         # Output of script 04, nested by dataset/preproc/subject
 │   │   └── leiden_flex_<n_runs>_<timestamp>/<dataset>/<preproc_pipeline>/sub-<subject>/
@@ -113,7 +113,7 @@ scans are already split into `baseline` and `CNO` segments before entering the p
 
 1. **`02_make_windows.py`** — Slides a 35-TR window (step = 3 TR) over each scan. Windows with ≥9 censored TRs (>25% of 35) are flagged and excluded. Results are written to `outputs/window_summary.csv`; scans skipped entirely due to scan-level censoring are logged to `outputs/report_mouse_censoring/skipped_scans.csv`.
 
-2. **`03_compute_window_connectivity.py`** — For each kept window, removes censored rows, computes the 16×16 ROI Pearson correlation matrix, and zeroes the diagonal. Negative correlations are retained in the saved matrix but ignored later by the positive-edge graph builder. Outputs one CSV per window under `outputs/window_connectivity/<dataset>/<preproc_pipeline>/<subject>/`, plus a `connectivity_summary.csv` with retained-window counts/ratios per scan.
+2. **`03_compute_window_connectivity.py`** — For each kept window, removes censored rows, computes the 16×16 ROI Pearson correlation matrix, and zeroes the diagonal. Negative correlations are retained in the saved matrix but ignored later by the positive-edge graph builder. Outputs one CSV per window under `outputs/window_connectivity/<dataset>/<preproc_pipeline>/<animal_id>/<subject_id>/`, plus a `connectivity_summary.csv` with retained-window counts/ratios per scan.
 
 3. **`04_run_community_detection.py`** — Builds a weighted undirected graph from each correlation matrix and runs temporal Leiden community detection. Mean per-ROI flexibility is saved to `outputs/community_detection/leiden_flex_<n_runs>_<timestamp>/<dataset>/<preproc_pipeline>/<subject>/<scan_id>.csv`. See [`docs/04_community_detection.md`](docs/04_community_detection.md) for a full walkthrough of the execution flow, parameters, and output format.
 

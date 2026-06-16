@@ -1,8 +1,11 @@
 """For each scan, define valid sliding windows."""
 
+import csv
 import os
 import pandas as pd
 from glob import glob
+
+from run_logging import record_run
 
 WINDOW_LENGTH = 35
 STEP_SIZE = 3
@@ -11,14 +14,21 @@ MAX_SCAN_CENSORED_FRAC = 0.25
 
 script_dir = os.path.dirname(__file__)
 DATA_ROOT = os.path.join(script_dir, "..", "for_ludo")
+OUTPUTS_DIR = os.path.join(script_dir, "..", "outputs")
 data_glob = os.path.join(DATA_ROOT, "*", "*", "*.csv")
-output_path = os.path.join(script_dir, "window_summary.csv")
+output_path = os.path.join(OUTPUTS_DIR, "window_summary.csv")
 
+report_mouse_dir = os.path.join(OUTPUTS_DIR, "report_mouse_censoring")
 
 def check_line(line: pd.Series) -> bool:
     """Return True if the row is censored."""
     roi_values = line.drop(["Time (sec)"], errors="ignore")
     return roi_values.isna().all()
+
+
+def extract_subject(csv_path: str) -> str:
+    """Return the basename of the csv file (e.g. sub-ag231130c_EXP_bold_parcellated), so the group (EXP/SHAM) is visible."""
+    return os.path.basename(csv_path).replace(".csv", "")
 
 
 def parse_dataset_path(csv_path: str) -> tuple[str, str]:
@@ -42,8 +52,29 @@ def make_windows(csv_path: str) -> list[dict]:
 
     # Scan-level censoring: skip scans with >25% censored TRs
     scan_censored_frac = censored_rows.sum() / len(df)
+
+    # If the scan-level censoring threshold is exceeded, skip this scan and log it in report_mouse_censoring/skipped_scans.csv
     if scan_censored_frac > MAX_SCAN_CENSORED_FRAC:
         print(f"Skipping {os.path.basename(csv_path)}: {scan_censored_frac:.1%} censored TRs (scan-level threshold exceeded)")
+
+        # Report mouse: log skipped entire csv and their censored row count
+        os.makedirs(report_mouse_dir, exist_ok=True)
+        skipped_path = os.path.join(report_mouse_dir, "skipped_scans.csv")
+        write_header = not os.path.exists(skipped_path)
+
+        # Append to skipped_scans.csv with scan_id, csv_path, and n_censored_rows
+        with open(skipped_path, "a", newline="") as f:
+            writer = csv.writer(f)
+            if write_header:
+                writer.writerow(["dataset", "preproc_pipeline", "scan_id", "csv_path", "n_censored_rows", "pct_censored"])
+            writer.writerow([
+                dataset,
+                preproc_pipeline,
+                extract_subject(csv_path),
+                csv_path,
+                f"{int(censored_rows.sum())} / {len(df)}",
+                f"{scan_censored_frac:.1%}",
+            ])
         return []
 
     windows = []
@@ -77,6 +108,7 @@ def make_windows(csv_path: str) -> list[dict]:
 
 
 if __name__ == '__main__':
+    os.makedirs(OUTPUTS_DIR, exist_ok=True)
     all_windows = []
 
     for csv_path in sorted(glob(data_glob)):
@@ -84,3 +116,16 @@ if __name__ == '__main__':
 
     pd.DataFrame(all_windows).to_csv(output_path, index=False)
     print(f"Wrote {len(all_windows)} windows to {output_path}")
+
+    record_run(
+        "02_make_windows",
+        OUTPUTS_DIR,
+        params={
+            "WINDOW_LENGTH": WINDOW_LENGTH,
+            "STEP_SIZE": STEP_SIZE,
+            "MAX_CENSORED_TRS": MAX_CENSORED_TRS,
+            "MAX_SCAN_CENSORED_FRAC": MAX_SCAN_CENSORED_FRAC,
+        },
+        n_windows=len(all_windows),
+        output_path=os.path.relpath(output_path, OUTPUTS_DIR),
+    )
