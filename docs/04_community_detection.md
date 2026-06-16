@@ -25,7 +25,7 @@ The top-level coordinator. It:
 Handles one scan end-to-end. It:
 - Prints the `[1/12] scan_name` header line
 - Calls `run_community_detection` to do the actual computation
-- Saves the result DataFrame to a CSV file under `window_communities/`
+- Saves the result DataFrame to a CSV file under `outputs/community_detection/leiden_flex_<n_runs>_<timestamp>/`
 - Prints the `saved →` and `total` lines
 
 ### 4. `run_community_detection()` *(once per scan)*
@@ -71,7 +71,7 @@ Averages the N_RUNS flexibility lists across runs, packages everything into a Da
 
 ## Output
 
-One CSV per scan saved to `window_communities/<dataset>/<preproc>/<subject>/<scan_id>.csv`:
+One CSV per scan saved to `outputs/community_detection/leiden_flex_<n_runs>_<timestamp>/<dataset>/<preproc>/<subject>/<scan_id>.csv`:
 
 | Column | Description |
 |---|---|
@@ -97,7 +97,7 @@ One CSV per scan saved to `window_communities/<dataset>/<preproc>/<subject>/<sca
   loading    664 windows                                  0.8s
   building   supra-graph                                  0.05s
   running    100 × Leiden  (1 workers)                    36s
-  saved      → window_communities/.../sub-ag230912d_SHAM_bold_parcellated.csv
+  saved      → outputs/community_detection/leiden_flex_<n_runs>_<timestamp>/.../sub-ag230912d_SHAM_bold_parcellated.csv
   total      37s
 
 ════════════════════════════════════════════════════════════════
@@ -112,5 +112,5 @@ One CSV per scan saved to `window_communities/<dataset>/<preproc>/<subject>/<sca
 ## Related docs
 
 - [pipeline_walkthrough.md](pipeline_walkthrough.md) — step-by-step trace with example values at each stage
-- [BenchmarkIssue_Louvain.md](BenchmarkIssue_Louvain.md) — diagnosis of the original slowness and the supra-adjacency fix
+- [pipeline_diagnostics_log.md](pipeline_diagnostics_log.md) — diagnosis of the original Louvain slowness and the supra-adjacency fix (2026-06-06 entry), plus other pipeline findings
 - [community_detection_plan.md](community_detection_plan.md) — windowing and censoring decisions
