@@ -1,3 +1,4 @@
+import argparse
 import re
 import time
 import numpy as np
@@ -14,11 +15,14 @@ from glob import glob
 from run_logging import record_run
 
 OUTPUTS_ROOT = os.path.join(os.path.dirname(__file__), "..", "outputs")
-CONNECTIVITY_DIR = os.path.join(OUTPUTS_ROOT, "window_connectivity")
 OUTPUTS_DIR = os.path.join(OUTPUTS_ROOT, "community_detection")
 
+
+def connectivity_dir_for_width(window_length: int) -> str:
+    return os.path.join(OUTPUTS_ROOT, f"window_connectivity_wl{window_length}")
+
 # Dataset to process, hardcoded for now.
-DATASET = "Bf_PV_anes"
+DATASET = "Bf_PV_awk"
 
 # ── Algorithm parameters (from TO_DO.md) ──────────────────────────────────────
 # Resolution parameter (γ): controls community granularity.
@@ -376,10 +380,11 @@ def run_all(
     return n_scans
 
 
-def test_one_connectivity_file():
+def test_one_connectivity_file(window_length: int = 35):
     """Smoke test on the first available scan (first 5 windows, 5 runs)."""
-    connectivity_files = sorted(glob(os.path.join(CONNECTIVITY_DIR, "*", "*", "*", "*", "*.csv")))
-    assert connectivity_files, f"No connectivity matrices found in {CONNECTIVITY_DIR}"
+    connectivity_dir = connectivity_dir_for_width(window_length)
+    connectivity_files = sorted(glob(os.path.join(connectivity_dir, "*", "*", "*", "*", "*.csv")))
+    assert connectivity_files, f"No connectivity matrices found in {connectivity_dir}"
 
     stem = os.path.basename(connectivity_files[0]).replace(".csv", "")
     match = re.search(r"_window_(\d+)$", stem)
@@ -400,15 +405,25 @@ def test_one_connectivity_file():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run temporal Leiden community detection.")
+    parser.add_argument(
+        "--window-length", type=int, default=35,
+        help="Window length in TR; selects window_connectivity_wl{N}/ as input and "
+             "namespaces the output dir as leiden_flex_wl{N}_...",
+    )
+    args = parser.parse_args()
+
+    connectivity_dir = connectivity_dir_for_width(args.window_length)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = os.path.join(OUTPUTS_DIR, f"leiden_flex_{N_RUNS}_{timestamp}")
-    n_scans = run_all(CONNECTIVITY_DIR, output_dir)
+    output_dir = os.path.join(OUTPUTS_DIR, f"leiden_flex_wl{args.window_length}_{N_RUNS}_{timestamp}")
+    n_scans = run_all(connectivity_dir, output_dir)
 
     record_run(
         "04_run_community_detection",
         output_dir,
         params={
             "dataset": DATASET,
+            "window_length": args.window_length,
             "gamma": GAMMA,
             "interslice_weight": INTERSLICE_WEIGHT,
             "n_runs": N_RUNS,

@@ -140,6 +140,11 @@ def compute_window_connectivity(window_summary_path: str, output_dir: str, force
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Compute per-window connectivity matrices.")
     parser.add_argument(
+        "--window-length", type=int, default=35,
+        help="Window length in TR; selects window_summary_wl{N}.csv as input and "
+             "window_connectivity_wl{N}/ as output.",
+    )
+    parser.add_argument(
         "--force", "-f",
         action="store_true",
         help="Recompute and overwrite even if output files already exist.",
@@ -147,8 +152,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     outputs_dir = os.path.join(os.path.dirname(__file__), "..", "outputs")
-    window_summary_path = os.path.join(outputs_dir, "window_summary.csv")
-    output_dir = os.path.join(outputs_dir, "window_connectivity")
+    window_summary_path = os.path.join(outputs_dir, f"window_summary_wl{args.window_length}.csv")
+    output_dir = os.path.join(outputs_dir, f"window_connectivity_wl{args.window_length}")
     os.makedirs(output_dir, exist_ok=True)
 
     results = compute_window_connectivity(window_summary_path, output_dir, force=args.force)
@@ -156,6 +161,6 @@ if __name__ == '__main__':
     record_run(
         "03_compute_window_connectivity",
         output_dir,
-        params={"force": args.force},
+        params={"window_length": args.window_length, "force": args.force},
         **results,
     )

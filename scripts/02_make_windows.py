@@ -1,5 +1,6 @@
 """For each scan, define valid sliding windows."""
 
+import argparse
 import csv
 import os
 import pandas as pd
@@ -7,18 +8,20 @@ from glob import glob
 
 from run_logging import record_run
 
+# Defaults; overridden by CLI args in __main__ (kept here so make_windows() has
+# sensible globals when imported directly, e.g. from notebooks).
 WINDOW_LENGTH = 35
 STEP_SIZE = 3
-MAX_CENSORED_TRS = 8
+MAX_CENSORED_TRS = round(0.25 * WINDOW_LENGTH)
 MAX_SCAN_CENSORED_FRAC = 0.25
 
 script_dir = os.path.dirname(__file__)
 DATA_ROOT = os.path.join(script_dir, "..", "for_ludo")
 OUTPUTS_DIR = os.path.join(script_dir, "..", "outputs")
 data_glob = os.path.join(DATA_ROOT, "*", "*", "*.csv")
-output_path = os.path.join(OUTPUTS_DIR, "window_summary.csv")
+output_path = os.path.join(OUTPUTS_DIR, f"window_summary_wl{WINDOW_LENGTH}.csv")
 
-report_mouse_dir = os.path.join(OUTPUTS_DIR, "report_mouse_censoring")
+report_mouse_dir = os.path.join(OUTPUTS_DIR, "report_mouse_censoring", f"wl{WINDOW_LENGTH}")
 
 def check_line(line: pd.Series) -> bool:
     """Return True if the row is censored."""
@@ -108,6 +111,23 @@ def make_windows(csv_path: str) -> list[dict]:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Build sliding windows for each scan.")
+    parser.add_argument(
+        "--window-length", type=int, default=WINDOW_LENGTH,
+        help="Window length in TR (TR=1.0s in this dataset).",
+    )
+    parser.add_argument(
+        "--step-size", type=int, default=STEP_SIZE,
+        help="Step size in TR between consecutive windows.",
+    )
+    args = parser.parse_args()
+
+    WINDOW_LENGTH = args.window_length
+    STEP_SIZE = args.step_size
+    MAX_CENSORED_TRS = round(0.25 * WINDOW_LENGTH)
+    output_path = os.path.join(OUTPUTS_DIR, f"window_summary_wl{WINDOW_LENGTH}.csv")
+    report_mouse_dir = os.path.join(OUTPUTS_DIR, "report_mouse_censoring", f"wl{WINDOW_LENGTH}")
+
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
     all_windows = []
 
