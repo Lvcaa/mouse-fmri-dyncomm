@@ -25,7 +25,19 @@ def connectivity_dir_for_width(window_length: int) -> str:
 
 
 # Dataset to process, hardcoded for now.
-DATASETS = ["Bf_PV_awk", "Bf_PV_anes", "Bf_DTA_awk", "Bf_DTA_anes"]
+# TEMPORARY: restricted to a single dataset for the pilot run (48 combos:
+# 4 gammas x 4 omegas x 3 widths). Restore the full list before the real sweep.
+DATASETS = ["Bf_PV_anes"]
+
+# Resume into an already-existing run directory instead of starting a fresh
+# timestamped one. When set, run_parameter_grid() writes new combos under
+# OUTPUTS_DIR/RESUME_RUN_NAME/wl{N}/gamma_X_omega_Y/{dataset}/... alongside
+# whatever datasets that run already has, and merges into its run_manifest.json
+# rather than overwriting it. Set to None to start a brand-new run as usual.
+# Currently pointed at the 2026-06-20 sweep so the Bf_DTA_awk combos land next
+# to the already-computed Bf_DTA_anes ones under the same wl{N}/gamma_X_omega_Y
+# folders (see docs/ParameterInspectionStuckRun.md).
+RESUME_RUN_NAME: Optional[str] = "2026_06_20__01-16-56"
 
 # Window lengths (TR, 1 TR = 1s) to sweep, each read from its own
 # window_connectivity_wl{N}/ directory (see 02/03_*.py --window-length).
@@ -534,15 +546,40 @@ def _validate_parameter_grid() -> None:
         raise ValueError("OMEGAS is empty; add at least one omega value before running parameter inspection.")
 
 
+def _load_or_init_manifest(run_name: str, run_dir: str, manifest_path: str, started_at: str) -> dict:
+    """Build a fresh manifest, or merge into one already on disk at run_dir.
+
+    Merging only updates ``datasets`` (union with the current DATASETS) and
+    flips ``status`` back to "running" — the existing ``runs``/``errors``/
+    ``skipped`` history from prior datasets in this run dir is preserved as-is;
+    new combos get appended to it by the caller.
+    """
+    if os.path.exists(manifest_path):
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+        manifest["datasets"] = sorted(set(manifest.get("datasets", [])) | set(DATASETS))
+        manifest["status"] = "running"
+        manifest["finished_at"] = None
+        manifest["elapsed_seconds"] = None
+        return manifest
+    return _build_manifest(run_name, run_dir, started_at)
+
+
 def run_parameter_grid() -> dict:
     """Run every dataset for every width/gamma/omega combination and keep a live manifest."""
     _validate_parameter_grid()
 
     started_at = _now_iso()
-    run_name = datetime.now().astimezone().strftime("%Y_%m_%d__%H-%M-%S")
-    run_name, run_dir = _unique_run_dir(OUTPUTS_DIR, run_name)
+    if RESUME_RUN_NAME:
+        run_name = RESUME_RUN_NAME
+        run_dir = os.path.join(OUTPUTS_DIR, run_name)
+        assert os.path.isdir(run_dir), f"RESUME_RUN_NAME={run_name!r} but {run_dir} does not exist"
+    else:
+        run_name = datetime.now().astimezone().strftime("%Y_%m_%d__%H-%M-%S")
+        run_name, run_dir = _unique_run_dir(OUTPUTS_DIR, run_name)
+
     manifest_path = os.path.join(run_dir, "run_manifest.json")
-    manifest = _build_manifest(run_name, run_dir, started_at)
+    manifest = _load_or_init_manifest(run_name, run_dir, manifest_path, started_at)
 
     os.makedirs(run_dir, exist_ok=True)
     _write_manifest(manifest, manifest_path)

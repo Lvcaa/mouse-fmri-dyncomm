@@ -1,5 +1,8 @@
 # To-Do List
 
+Prioritize the stable low-γ region: approximately γ=.25, ω=.10–.30, especially widths 50–70.
+Treat wl50, γ=.25, ω=.20 as a strong discovery candidate—not yet a confirmatory “winner.”
+
 ## Data Quality & Censoring
 
 - [ ] Check how many mice were removed due to censoring
